@@ -11,6 +11,10 @@ on:
         description: 'apk 包版本号（建议 x.y.z-rN 格式，例如 1.0.0-r1）'
         required: true
         default: '1.0.0-r1'
+      changelog:
+        description: '本次更新日志（可选，留空则自动生成）'
+        required: false
+        default: ''
   push:
     tags:
       - 'v*'
@@ -270,7 +274,9 @@ jobs:
         with:
           # 加 -apk 后缀，与 ipk 的 release 区分开；deploy.yml 靠这个后缀识别最新的 apk 产物
           tag_name: ${{ github.event.inputs.version && format('v{0}-apk', github.event.inputs.version) || format('{0}-apk', github.ref_name) }}
-          generate_release_notes: true
+          name: ${{ github.event.inputs.version && format('v{0}-apk', github.event.inputs.version) || format('{0}-apk', github.ref_name) }}
+          body: ${{ github.event.inputs.changelog }}
+          generate_release_notes: ${{ github.event.inputs.changelog == '' }}
           files: |
             release-files/*.apk
             release-files/miaomiaowu-apk.pem
