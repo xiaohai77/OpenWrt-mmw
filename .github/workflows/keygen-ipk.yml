@@ -1,0 +1,41 @@
+name: keygen-ipk (一次性生成签名密钥)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keygen:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 下载 OpenWrt SDK (拿 usign 工具)
+        run: |
+          wget -q "https://downloads.openwrt.org/releases/23.05.3/targets/x86/64/openwrt-sdk-23.05.3-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz" -O sdk.tar.xz
+          tar -xf sdk.tar.xz
+          mv openwrt-sdk-* openwrt-sdk
+
+      - name: 生成 usign 密钥对
+        run: |
+          mkdir -p keys
+          USIGN_BIN=$(find openwrt-sdk -type f -name usign -path "*/host/bin/*" | head -n1)
+          "$USIGN_BIN" -G -c "miaomiaowu ipk sign key" -s /tmp/mmw-ipk-sign.key -p keys/miaomiaowu-ipk.pub
+          cat keys/miaomiaowu-ipk.pub
+
+      - name: 提交公钥到仓库
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add keys/miaomiaowu-ipk.pub
+          git commit -m "chore: add miaomiaowu ipk sign public key"
+          git push
+
+      - name: 上传私钥（下载后立刻删除这个 artifact）
+        uses: actions/upload-artifact@v4
+        with:
+          name: mmw-ipk-sign-key-DELETE-AFTER-DOWNLOAD
+          path: /tmp/mmw-ipk-sign.key
+          retention-days: 1
