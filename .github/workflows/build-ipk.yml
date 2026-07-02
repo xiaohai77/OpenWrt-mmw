@@ -98,7 +98,7 @@ jobs:
           chmod +x scripts/build-luci-ipk.sh
           VERSION="${{ github.event.inputs.version || github.ref_name }}"
           VERSION="${VERSION#v}"
-          ./scripts/build-luci-ipk.sh "$VERSION" dist
+          ./scripts/build-luci-ipk.sh "$VERSION" "$GITHUB_WORKSPACE/dist"
 
       - name: 上传 artifact
         uses: actions/upload-artifact@v4
