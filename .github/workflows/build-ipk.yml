@@ -139,7 +139,7 @@ jobs:
   publish-repo:
     name: 生成并发布 ipk 软件源
     needs: [build, build-luci]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
