@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [arm64, armv7, armv6, armv5, amd64, x86]
+        target: [arm64, armv7, armv6, armv5, amd64, x86, riscv64]
     steps:
       - name: Checkout 打包仓库（本仓库）
         uses: actions/checkout@v4
