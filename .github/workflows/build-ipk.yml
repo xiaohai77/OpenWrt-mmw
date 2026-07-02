@@ -11,12 +11,31 @@ on:
         description: 'ipk 包版本号'
         required: true
         default: '1.0.0'
+      changelog:
+        description: '本次更新日志（可选，留空则自动生成）'
+        required: false
+        default: ''
   push:
     tags:
       - 'v*'
 
 jobs:
+  version:
+    name: 计算版本号
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - id: v
+        run: |
+          RAW="${{ github.event.inputs.version || github.ref_name }}"
+          VERSION="${RAW#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: version
     name: Build ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
@@ -73,8 +92,7 @@ jobs:
           chmod +x scripts/build-ipk.sh
           source scripts/arch-map.sh
 
-          VERSION="${{ github.event.inputs.version || github.ref_name }}"
-          VERSION="${VERSION#v}"
+          VERSION="${{ needs.version.outputs.version }}"
 
           for OPKG_ARCH in ${OPKG_ARCHES[${{ matrix.target }}]}; do
             ./scripts/build-ipk.sh "$GITHUB_WORKSPACE/mmw-bin" "$OPKG_ARCH" "$VERSION" "$GITHUB_WORKSPACE/dist"
@@ -88,6 +106,7 @@ jobs:
 
   build-luci:
     name: Build luci-app-miaomiaowu (arch=all)
+    needs: version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 打包仓库
@@ -96,8 +115,7 @@ jobs:
       - name: 打包 LuCI 前端 ipk
         run: |
           chmod +x scripts/build-luci-ipk.sh
-          VERSION="${{ github.event.inputs.version || github.ref_name }}"
-          VERSION="${VERSION#v}"
+          VERSION="${{ needs.version.outputs.version }}"
           ./scripts/build-luci-ipk.sh "$VERSION" "$GITHUB_WORKSPACE/dist"
 
       - name: 上传 artifact
@@ -108,7 +126,7 @@ jobs:
 
   release:
     name: 汇总并发布
-    needs: [build, build-luci]
+    needs: [version, build, build-luci]
     if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
@@ -128,8 +146,13 @@ jobs:
       - name: 创建 Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          generate_release_notes: true
+          # 之前这里直接用 github.ref_name：手动触发时它是运行所在的分支名（比如 "main"），
+          # 而不是版本号，导致每次都发布/覆盖到同一个叫 "main" 的 release。
+          # 改成用 version job 统一算好的 vX.Y.Z 标签。
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: ${{ needs.version.outputs.tag }}
+          body: ${{ github.event.inputs.changelog }}
+          generate_release_notes: ${{ github.event.inputs.changelog == '' }}
           files: |
             all-ipks/*.ipk
             all-ipks/checksums.txt
