@@ -11,7 +11,7 @@ CPU 型号），见 `scripts/arch-map.sh`：
 
 | go-target  | 编译参数                        | 覆盖的 opkg 架构（举例） |
 |-----------|----------------------------------|--------------------------|
-| arm64     | GOARCH=arm64                     | aarch64_cortex-a53（你的 JDCloud AX1800 Pro）、aarch64_cortex-a72、aarch64_generic |
+| arm64     | GOARCH=arm64                     | aarch64_cortex-a53、aarch64_cortex-a72、aarch64_generic |
 | armv7     | GOARCH=arm GOARM=7                | arm_cortex-a7/a9/a15 等 |
 | armv6     | GOARCH=arm GOARM=6                | arm_arm1176jzf-s_vfp 等 |
 | armv5     | GOARCH=arm GOARM=5                | arm_mpcore、arm_xscale |
