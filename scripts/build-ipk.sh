@@ -51,9 +51,9 @@ tar --numeric-owner --owner=0 --group=0 -C "$CTRL" -czf "$WORK/control.tar.gz" .
 # ---- debian-binary ----
 echo "2.0" > "$WORK/debian-binary"
 
-# ---- 最终 ipk = ar 归档 ----
+# ---- 最终 ipk = tar.gz 归档 ----
 mkdir -p "$OUTDIR"
 OUT="$OUTDIR/${PKG_NAME}_${VERSION}_${ARCH}.ipk"
-(cd "$WORK" && ar rc "$OUT" debian-binary control.tar.gz data.tar.gz)
+(cd "$WORK" && tar --numeric-owner --owner=0 --group=0 -czf "$OUT" debian-binary control.tar.gz data.tar.gz)
 
 echo "生成: $OUT"
