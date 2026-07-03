@@ -5,9 +5,6 @@
 		"action": {
 			"type": "view",
 			"path": "miaomiaowu"
-		},
-		"depends": {
-			"acl": ["luci-app-miaomiaowu"]
 		}
 	}
 }
