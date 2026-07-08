@@ -1,5 +1,4 @@
 #!/bin/bash
-# 用法: build-luci-ipk.sh <version> <output_dir>
 set -euo pipefail
 
 VERSION="$1"
@@ -39,8 +38,7 @@ echo "2.0" > "$WORK/debian-binary"
 
 mkdir -p "$OUTDIR"
 OUT="$OUTDIR/${PKG_NAME}_${VERSION}_all.ipk"
-# ---- 最终 ipk = tar.gz 归档 ----
-# 成员名同样必须带 "./" 前缀，原因见 build-ipk.sh 里的注释
+
 (cd "$WORK" && tar --numeric-owner --owner=0 --group=0 -czf "$OUT" ./debian-binary ./control.tar.gz ./data.tar.gz)
 
 echo "生成: $OUT"
