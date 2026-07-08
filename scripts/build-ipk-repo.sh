@@ -1,6 +1,4 @@
 #!/bin/bash
-# 用法: build-ipk-repo.sh <所有ipk所在目录> <输出site目录> <ipkg-make-index.sh路径> <usign二进制路径> <私钥文件路径>
-# 架构从 ipk 内部 control 文件读取，不从文件名猜（文件名里 arch 本身带下划线，猜不准）
 set -euo pipefail
 
 SRC_DIR="$1"
@@ -10,7 +8,6 @@ USIGN_BIN="$4"
 SIGN_KEY="$5"
 
 get_arch() {
-  # ipk 内部成员名带 "./" 前缀（见 build-ipk.sh），提取时要精确匹配上，否则会静默失败
   local ipk="$1" tmp
   tmp=$(mktemp -d)
   tar -xzf "$ipk" -C "$tmp" ./control.tar.gz
