@@ -101,8 +101,6 @@ jobs:
           set -e
           if ls apk-download/*.apk >/dev/null 2>&1; then
             echo "Building APK repository..."
-            # 注意: 这里的密钥名必须和 build-apk.yml 里用来签名单个 apk 包的密钥是同一份，
-            # 否则 packages.adb 索引签名和包本身的签名对不上。
             echo "${{ secrets.APK_SIGN_KEY }}" > /tmp/apk-sign.key
             openssl ec \
               -in /tmp/apk-sign.key \
@@ -112,9 +110,6 @@ jobs:
             mkdir -p /tmp/keys
             cp site/miaomiaowu-apk.pem /tmp/keys/
 
-            # GitHub Release 附件本来就是扁平的、没有子目录，架构信息只能从文件名里找回来。
-            # 用 luci-app-miaomiaowu_<version>_all.apk 这个必然唯一的文件名反推出本次的版本号，
-            # 再用这个版本号从 miaomiaowu_<version>_<arch>.apk 里精确切出架构名（哪怕架构名本身带下划线也不会错）。
             LUCI_APK=$(ls apk-download/luci-app-miaomiaowu_*_all.apk 2>/dev/null | head -n1)
             if [ -z "$LUCI_APK" ]; then
               echo "警告: apk-download 里没有 luci-app-miaomiaowu，跳过 APK 软件源生成" >&2
@@ -131,16 +126,6 @@ jobs:
                 ARCH="${BIN_BASENAME#miaomiaowu_${VERSION}_}"
                 [ -z "$ARCH" ] && { echo "警告: 无法识别 $BIN_APK 的架构，跳过" >&2; continue; }
                 mkdir -p "site/openwrt-apk/$ARCH"
-                # 注意: apk 客户端请求包文件时，是按 "<name>-<version>.apk" 这种
-                # Alpine/apk-tools 约定去拼 URL 的（比如官方源里的 busybox-1.37.0-r6.apk），
-                # 不带架构后缀（架构已经体现在目录里了）。而 CI 中间产物为了能在同一个
-                # GitHub Release 里塞下所有架构，文件名必须带上 "_$ARCH" 后缀来区分
-                # （miaomiaowu_<version>_<arch>.apk），两者的文件名规则不一样。
-                # 之前直接 cp 过来，目录里放的还是带架构后缀的文件名，跟 apk 客户端实际
-                # 请求的 URL 对不上，下载会 404（表现为 "wget: exited with error 2" +
-                # "file format is invalid or inconsistent"，报错信息里的
-                # "<name>-<version>" 就是 apk 按约定算出来、但仓库里并不存在的文件名）。
-                # 这里落地到 site 目录时按 apk 的约定重命名，去掉架构后缀。
                 cp "$BIN_APK" "site/openwrt-apk/$ARCH/miaomiaowu-${VERSION}.apk"
                 cp "$LUCI_APK" "site/openwrt-apk/$ARCH/luci-app-miaomiaowu-${VERSION}.apk"
                 (
@@ -160,9 +145,6 @@ jobs:
             echo "No APK packages found. Skip."
           fi
 
-          # 兜底: 如果本次只跑了 APK 流程(IPK 分支没触发,site/ 还没被上面那段建出来),
-          # feed.sh/install.sh/uninstall.sh 这几个跟包管理器无关的通用脚本也要能发出去,
-          # 不能只指望 IPK 分支去拷它们。
           mkdir -p site
           cp scripts/install.sh site/install.sh
           cp scripts/feed.sh site/feed.sh
