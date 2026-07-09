@@ -87,6 +87,11 @@ jobs:
               "$GITHUB_WORKSPACE/$USIGN_BIN" \
               /tmp/ipk-sign.key
             shred -u /tmp/ipk-sign.key 2>/dev/null || rm -f /tmp/ipk-sign.key
+            
+            if [ -d "site/openwrt-ipk" ]; then
+              mv site/openwrt-ipk site/openwrt-24.10
+            fi
+
             mkdir -p site
             cp keys/miaomiaowu-ipk.pub site/miaomiaowu-ipk.pub
             cp scripts/install.sh site/install.sh
@@ -119,17 +124,17 @@ jobs:
               VERSION="${VERSION%_all}"
               echo "识别到 APK 版本号: $VERSION"
 
-              mkdir -p site/openwrt-apk
+              mkdir -p site/openwrt-25.12
               for BIN_APK in apk-download/miaomiaowu_"${VERSION}"_*.apk; do
                 [ -e "$BIN_APK" ] || continue
                 BIN_BASENAME=$(basename "$BIN_APK" .apk)
                 ARCH="${BIN_BASENAME#miaomiaowu_${VERSION}_}"
                 [ -z "$ARCH" ] && { echo "警告: 无法识别 $BIN_APK 的架构，跳过" >&2; continue; }
-                mkdir -p "site/openwrt-apk/$ARCH"
-                cp "$BIN_APK" "site/openwrt-apk/$ARCH/miaomiaowu-${VERSION}.apk"
-                cp "$LUCI_APK" "site/openwrt-apk/$ARCH/luci-app-miaomiaowu-${VERSION}.apk"
+                mkdir -p "site/openwrt-25.12/$ARCH"
+                cp "$BIN_APK" "site/openwrt-25.12/$ARCH/miaomiaowu-${VERSION}.apk"
+                cp "$LUCI_APK" "site/openwrt-25.12/$ARCH/luci-app-miaomiaowu-${VERSION}.apk"
                 (
-                  cd "site/openwrt-apk/$ARCH"
+                  cd "site/openwrt-25.12/$ARCH"
                   "$GITHUB_WORKSPACE/$APK_BIN" mkndx \
                     --keys-dir /tmp/keys \
                     --allow-untrusted \
@@ -137,7 +142,7 @@ jobs:
                     --output packages.adb \
                     *.apk
                 )
-                echo "已生成软件源: site/openwrt-apk/$ARCH"
+                echo "已生成软件源: site/openwrt-25.12/$ARCH"
               done
             fi
             shred -u /tmp/apk-sign.key 2>/dev/null || rm -f /tmp/apk-sign.key
@@ -193,9 +198,9 @@ jobs:
       - name: Generate no-cache headers
         run: |
           cat > site/_headers << 'EOF'
-          /openwrt-ipk/*
+          /openwrt-24.10/*
             Cache-Control: no-cache, no-store, must-revalidate
-          /openwrt-apk/*
+          /openwrt-25.12/*
             Cache-Control: no-cache, no-store, must-revalidate
           /*.pem
             Cache-Control: no-cache, no-store, must-revalidate
