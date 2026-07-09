@@ -1,15 +1,15 @@
-include $(TOPDIR)/rules.mk
+Include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miaomiaowu
 
-PKG_VERSION:=$(strip $(shell wget -qO- "https://miaomiaowu-openwrt.445568.xyz/openwrt-ipk/$(ARCH_PACKAGES)/Packages" 2>/dev/null | \
+PKG_VERSION:=$(strip $(shell wget -qO- "https://miaomiaowu-openwrt.445568.xyz/openwrt-24.10/$(ARCH_PACKAGES)/Packages" 2>/dev/null | \
 	awk '/^Package: miaomiaowu$$/{f=1;next} f&&/^Version:/{print $$2;exit} /^$$/{f=0}'))
 ifeq ($(PKG_VERSION),)
   PKG_VERSION:=0.0.0-VERSION-FETCH-FAILED
 endif
 PKG_RELEASE:=1
 
-PKG_SOURCE_URL:=https://miaomiaowu-openwrt.445568.xyz/openwrt-ipk/$(ARCH_PACKAGES)
+PKG_SOURCE_URL:=https://miaomiaowu-openwrt.445568.xyz/openwrt-24.10/$(ARCH_PACKAGES)
 PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk
 PKG_SOURCE_PROTO:=default
 PKG_HASH:=skip
@@ -33,7 +33,7 @@ endef
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 ifeq ($(PKG_VERSION),0.0.0-VERSION-FETCH-FAILED)
-	@echo "错误: 没能从 https://miaomiaowu-openwrt.445568.xyz/openwrt-ipk/$(ARCH_PACKAGES)/Packages 取到版本号" >&2
+	@echo "错误: 没能从 https://miaomiaowu-openwrt.445568.xyz/openwrt-24.10/$(ARCH_PACKAGES)/Packages 取到版本号" >&2
 	@echo "      请检查该 URL 是否能访问，以及 Packages 里是不是真有 miaomiaowu 这个条目" >&2
 	@exit 1
 endif
