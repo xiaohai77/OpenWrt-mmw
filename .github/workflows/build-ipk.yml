@@ -146,8 +146,8 @@ jobs:
       - name: 创建 Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.version.outputs.tag }}
-          name: ${{ needs.version.outputs.tag }}
+          tag_name: ${{ needs.version.outputs.tag }}-ipk
+          name: ${{ needs.version.outputs.tag }}-ipk
           body: ${{ github.event.inputs.changelog }}
           generate_release_notes: ${{ github.event.inputs.changelog == '' }}
           files: |
