@@ -1,6 +1,6 @@
 # 妙妙屋 - 个人Clash订阅管理系统
 
-一个轻量级、易部署的Clash订阅管理系统，支持 Nezha、DStatus 和 Komari 探针获取流量信息，导入外部机场节点等功能。
+一个轻量级、易使用的Clash订阅管理系统，支持 Nezha、DStatus 和 Komari 探针获取流量信息，导入外部机场节点等功能。
 
 ## 功能特性
 
