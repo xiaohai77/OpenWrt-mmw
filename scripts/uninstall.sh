@@ -11,7 +11,7 @@ if command -v uci >/dev/null 2>&1; then
 fi
 
 if command -v opkg >/dev/null 2>&1; then
-    echo "检测到 opkg（OpenWrt 23.05 及更早版本）"
+    echo "检测到 opkg（OpenWrt 24.05 及更早版本）"
     opkg remove luci-app-miaomiaowu 2>/dev/null || true
     opkg remove miaomiaowu 2>/dev/null || true
 
